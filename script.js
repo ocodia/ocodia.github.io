@@ -4,44 +4,33 @@ document.addEventListener('DOMContentLoaded', function() {
     canvas.width = canvas.offsetWidth;
     canvas.height = canvas.offsetHeight;
 
-    let zoomLevel = 0; // Zoom levels: 0 (years) to 5 (seconds)
+    let scale = 1; // Starting scale
     let offsetX = 0; // Horizontal scroll offset
+    // Example data, replace with your data as needed
     const data = [
         { timestamp: Date.parse('2023-01-01T00:00:00Z'), value: 10 },
-        { timestamp: Date.parse('2023-02-02T00:00:00Z'), value: 15 },
-        { timestamp: Date.parse('2023-03-03T00:00:00Z'), value: 8 },
-        { timestamp: Date.parse('2023-04-04T00:00:00Z'), value: 12 },
-        { timestamp: Date.parse('2023-05-05T00:00:00Z'), value: 17 }
+        { timestamp: Date.parse('2023-01-02T00:00:00Z'), value: 15 },
+        { timestamp: Date.parse('2023-01-03T00:00:00Z'), value: 8 },
+        { timestamp: Date.parse('2023-01-04T00:00:00Z'), value: 12 },
+        { timestamp: Date.parse('2023-01-05T00:00:00Z'), value: 17 },
+        { timestamp: Date.parse('2023-01-06T00:00:00Z'), value: 6 },
+        { timestamp: Date.parse('2023-01-07T00:00:00Z'), value: 11 }
     ];
 
-    function formatDate(timestamp) {
+    function formatDate(timestamp, scale) {
         const date = new Date(timestamp);
-        switch (zoomLevel) {
-            case 0: return `${date.getFullYear()}`;
-            case 1: return `${date.getFullYear()}-${date.getMonth() + 1}`;
-            case 2: return `${date.getMonth() + 1}/${date.getDate()}`;
-            case 3: return `${date.getHours()}:00`;
-            case 4: return `${date.getHours()}:${date.getMinutes()}`;
-            case 5: return `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
-            default: return `${date.getMonth() + 1}/${date.getDate()}`;
-        }
-    }
-
-    function getScaleFactor() {
-        switch (zoomLevel) {
-            case 0: return 31536000000; // Year
-            case 1: return 2592000000;  // Month
-            case 2: return 86400000;    // Day
-            case 3: return 3600000;     // Hour
-            case 4: return 60000;       // Minute
-            case 5: return 1000;        // Second
-            default: return 86400000;
+        if (scale > 1000000) { // Year level
+            return `${date.getFullYear()}`;
+        } else if (scale > 10000) { // Day level
+            return `${date.getMonth() + 1}/${date.getDate()}`;
+        } else { // Second level
+            return `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
         }
     }
 
     function drawChart() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        const scaleFactor = getScaleFactor();
+        const now = new Date();
         
         // Draw axis lines
         ctx.beginPath();
@@ -55,7 +44,7 @@ document.addEventListener('DOMContentLoaded', function() {
         ctx.beginPath();
         ctx.strokeStyle = 'black';
         for (let i = 0; i < data.length; i++) {
-            const x = ((data[i].timestamp - data[0].timestamp) / scaleFactor * scale) - offsetX + 30;
+            const x = ((data[i].timestamp - data[0].timestamp) / 1000000 * scale) - offsetX + 30;
             const y = canvas.height - data[i].value * 10 - 30;
             if (i === 0) {
                 ctx.moveTo(x, y);
@@ -67,21 +56,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Draw x-axis labels
         ctx.textAlign = 'center';
-        let labelSpacing = 100 * scaleFactor; // Adjust label spacing based on scale
+        let labelSpacing = 100 * scale; // Adjust label spacing based on scale
         for (let i = 0; i < canvas.width; i += labelSpacing) {
-            const timestamp = data[0].timestamp + (i + offsetX) * scaleFactor;
-            const label = formatDate(timestamp);
+            const timestamp = data[0].timestamp + (i + offsetX) * 1000000 / scale;
+            const label = formatDate(timestamp, scale);
             ctx.fillText(label, i + 30, canvas.height - 10);
         }
 
         // Draw 'Now' line
-        drawNowLine();
-    }
-
-    function drawNowLine() {
-        const now = new Date();
-        const scaleFactor = getScaleFactor();
-        const nowX = ((now.getTime() - data[0].timestamp) / scaleFactor) - offsetX + 30;
+        const nowX = ((now.getTime() - data[0].timestamp) / 1000000 * scale) - offsetX + 30;
         if (nowX >= 30 && nowX <= canvas.width) {
             ctx.beginPath();
             ctx.strokeStyle = 'orange';
@@ -93,17 +76,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Zoom in/out functionality
     document.getElementById('zoomIn').addEventListener('click', function() {
-        zoomLevel = Math.min(zoomLevel + 1, 5); // Limit zoom in
+        scale *= 2;
         drawChart();
     });
 
     document.getElementById('zoomOut').addEventListener('click', function() {
-        zoomLevel = Math.max(zoomLevel - 1, 0); // Limit zoom out
+        scale = Math.max(1, scale / 2);
         drawChart();
     });
 
     // Scroll functionality
-    let isDragging    = false;
+    let isDragging = false;
     let lastX = 0;
 
     function getXPosition(event) {
@@ -145,7 +128,7 @@ document.addEventListener('DOMContentLoaded', function() {
     canvas.addEventListener('touchend', endScroll);
 
     // Update 'Now' line every second
-    setInterval(drawNowLine, 1000);
+    setInterval(drawChart, 1000);
     
     drawChart();
 });
