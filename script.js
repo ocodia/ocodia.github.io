@@ -8,10 +8,10 @@ document.addEventListener('DOMContentLoaded', function() {
     let offsetX = 0; // Horizontal scroll offset
     const data = [
         { timestamp: Date.parse('2023-01-01T00:00:00Z'), value: 10 },
-        { timestamp: Date.parse('2023-01-02T00:00:00Z'), value: 15 },
-        { timestamp: Date.parse('2023-01-03T00:00:00Z'), value: 8 },
-        { timestamp: Date.parse('2023-01-04T00:00:00Z'), value: 12 },
-        { timestamp: Date.parse('2023-01-05T00:00:00Z'), value: 17 }
+        { timestamp: Date.parse('2023-02-02T00:00:00Z'), value: 15 },
+        { timestamp: Date.parse('2023-03-03T00:00:00Z'), value: 8 },
+        { timestamp: Date.parse('2023-04-04T00:00:00Z'), value: 12 },
+        { timestamp: Date.parse('2023-05-05T00:00:00Z'), value: 17 }
     ];
 
     function formatDate(timestamp) {
