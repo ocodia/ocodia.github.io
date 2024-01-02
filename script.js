@@ -1,8 +1,9 @@
 document.addEventListener('DOMContentLoaded', function() {
     const canvas = document.getElementById('timeSeriesChart');
+
     const ctx = canvas.getContext('2d');
-    canvas.width = canvas.offsetWidth;
-    canvas.height = canvas.offsetHeight;
+    canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
     let scale = 1; // Starting scale
     let offsetX = 0; // Horizontal scroll offset
